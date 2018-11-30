@@ -7,7 +7,7 @@ import java.util.List;
 
 
 // Server class
-public class Server extends Thread{
+public class Server extends Thread {
 
   // Data members
   private int port;                                      // Server port
@@ -15,22 +15,21 @@ public class Server extends Thread{
   private HashSet<String> roomList;
 
   // Constructor
-  public Server(int port){
+  public Server(int port) {
     this.port = port;
     this.connectionList = new ArrayList<>();
     roomList = new HashSet<>();
   }
 
-  public String getServerRooms(){
-    if(roomList.isEmpty()){
+  public String getServerRooms() {
+    if (roomList.isEmpty()) {
       String output = "There are no rooms.";
       return output;
-    }
-    else
+    } else
       return roomList.toString();
   }
 
-  public void addServerRoom(String roomName){
+  public void addServerRoom(String roomName) {
     roomList.add(roomName);
   }
 
@@ -40,30 +39,37 @@ public class Server extends Thread{
   }
 
   // Allows for all connections to have access to list of all connections
-  public List<Connection> getConnectionList(){
+  public List<Connection> getConnectionList() {
     return connectionList;
   }
 
   // Override Thread.run()
   public void run() {
-    try{
+    try {
       ServerSocket serverSocket = new ServerSocket(port);   //creates server socket on port
       System.out.write("server is up!\n".getBytes());
 
       // Infinite loop to continuously handle incoming connections
-      while(true){
+      while (true) {
         Socket clientSocket = serverSocket.accept();              // Accepts connection to the client - returns socket
         Connection connection = new Connection(this, clientSocket);   // Handles communication with client socket
         connectionList.add(connection);                                      // Add client connection to list
         connection.start();
+
+        // Remove any connections that have been ended
+        for (Connection conn : connectionList) {
+          if (!conn.isAlive()) {
+            if (conn.getNickname() != null)
+              connectionList.remove(conn);
+          }
+        }
       }
-    }
-    catch (IOException e){
+    } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  public static void main(String [] args) {
+  public static void main(String[] args) {
     int port = 6667;
     Server server = new Server(port);
     server.start();   //kicks off server thread

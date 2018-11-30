@@ -1,6 +1,7 @@
 // Instance of connection to server
 
 import org.apache.commons.lang3.*;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.HashSet;
@@ -65,12 +66,10 @@ public class Connection extends Thread {
         } else if (command.equals("SEND")) {
           String[] parsedMessage = StringUtils.split(userInput, null, 3);          //splits the userInput into diff string parsedInput based on whitespace
           sendMsg(parsedMessage);
-        } else if (command.equals("HELP")){
+        } else if (command.equals("HELP")) {
           displayCommands();
-        }
-        else {
-          String msg = "Unknown command: " + command + "\n";
-          out.write(msg.getBytes());
+        } else {
+          printOut("Unknown command: " + command + "\n");
         }
       }
     }
@@ -79,22 +78,21 @@ public class Connection extends Thread {
   }
 
   // Displays all users in a room
-  private void displayUsers(String [] parsedInput) throws IOException {
-    if(parsedInput.length > 1){
+  private void displayUsers(String[] parsedInput) throws IOException {
+    if (parsedInput.length > 1) {
       String roomName = parsedInput[1];
       // Find message recipient
       List<Connection> connectionList = server.getConnectionList();
       boolean isEmpty = true;
       for (Connection connection : connectionList) {
-        if(connection.inRoom(roomName)) {
+        if (connection.inRoom(roomName)) {
           printOut(connection.nickname + "\n");
           isEmpty = false;
         }
       }
       if (isEmpty)
         printOut("The room is empty\n");
-    }
-    else
+    } else
       printOut("Please enter a room name\n");
   }
 
@@ -105,10 +103,12 @@ public class Connection extends Thread {
     out.write("Enter a nickname: \n".getBytes());
     BufferedReader br = new BufferedReader(new InputStreamReader(in));
     userInput = br.readLine();
-    parsedInput = StringUtils.split(userInput);
-    nickname = parsedInput[0];
-    String output = "Welcome, " + nickname + "!\n\n";
-    out.write(output.getBytes());
+    if (userInput != null) {
+      parsedInput = StringUtils.split(userInput);
+      nickname = parsedInput[0];
+      String output = "Welcome, " + nickname + "!\n\n";
+      out.write(output.getBytes());
+    }
   }
 
   // Displays all available commands
